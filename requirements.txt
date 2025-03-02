@@ -1,0 +1,8 @@
+python-dotenv
+argparse
+playwright
+langchain-openai
+pydantic
+browser-use
+chromium
+langchain_community
