@@ -1,14 +1,23 @@
-# GitHub Actions AI
+# GitHub Actions AI Generator
 
-This project automates the creation of GitHub Actions workflows using AI. It leverages Azure OpenAI and Playwright to generate and validate YAML configurations based on user queries.
+An intelligent system that generates, analyzes, and optimizes GitHub Actions workflows using AI. The tool provides comprehensive analysis reports and security recommendations for your CI/CD pipelines.
+
+## Features
+
+- 🤖 AI-powered workflow generation from natural language descriptions
+- 🔒 Security compliance checking
+- ⚡ Pipeline efficiency analysis
+- 📊 Build quality assessment
+- 📈 Performance metrics and recommendations
+- 🔍 Automated best practices validation
 
 ## Prerequisites
 
 - Python 3.7+
-- GitHub account
-- Azure OpenAI account
+- Azure OpenAI API access
+- Environment variables configured
 
-## Setup
+## Installation
 
 1. **Clone the repository**:
    ```sh
@@ -22,39 +31,67 @@ This project automates the creation of GitHub Actions workflows using AI. It lev
    ```
 
 3. **Configure environment variables**:
-   Create a `.env` file in the root directory with the following content:
+   Create a `.env` file:
    ```properties
-   GITHUB_USERNAME="your_github_username"
-   GITHUB_PASSWORD="your_github_password"
-   GITHUB_TOKEN="your_github_token"
-   OPENAI_API_KEY="your_openai_api_key"
-   AZURE_OPENAI_ENDPOINT="https://your_azure_openai_endpoint"
+   AZURE_OPENAI_ENDPOINT="your_azure_openai_endpoint"
+   AZURE_OPENAI_KEY="your_azure_openai_key"
    ```
 
 ## Usage
 
-Run the script with the required arguments:
+Generate and analyze a workflow:
 ```sh
-python github_actions_ai.py --repo <user/repo> --query "<workflow requirements>" --branch <branch_name>
+python github_actions_ai.py --query "your workflow description"
 ```
 
-### Example
-```sh
-python github_actions_ai.py --repo vikashegde21/github-ci-agent- --query "Run Python tests on push to main branch" --branch main
-```
+Example queries:
+- "Create a Python testing workflow with multiple Python versions"
+- "Build and deploy a Django application"
+- "Run linting and security checks on PR"
 
-## How It Works
+## Output
 
-1. **Authentication**: Logs into GitHub using the provided credentials.
-2. **Navigation**: Navigates to the GitHub Actions page of the specified repository.
-3. **YAML Generation**: Uses Azure OpenAI to generate a GitHub Actions YAML file based on the provided query.
-4. **Validation**: Validates the generated YAML against a predefined schema.
-5. **Workflow Creation**: Creates a new workflow in the repository with the generated YAML content.
+The tool generates:
+1. **GitHub Actions Workflow** (`.github/workflows/`)
+   - Automatically named based on the query
+   - Valid YAML syntax
+   - Best practices implemented
+
+2. **Analysis Report** (`reports/`)
+   - Build quality metrics
+   - Security compliance
+   - Efficiency analysis
+   - Performance estimates
+   - Recommendations
+
+## Analysis Features
+
+### Security Checks
+- Action version validation
+- Unsafe pattern detection
+- Permission analysis
+- Security best practices
+
+### Efficiency Analysis
+- Pipeline metrics
+- Resource utilization
+- Build time estimation
+- Optimization suggestions
+
+### Quality Gates
+- Linting configuration
+- Test coverage
+- Type checking
+- Dependency auditing
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+Contributions welcome! Areas for improvement:
+- Additional workflow templates
+- Enhanced security checks
+- More analysis metrics
+- Custom reporting formats
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License
