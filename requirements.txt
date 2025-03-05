@@ -3,7 +3,6 @@ argparse
 playwright
 langchain-openai
 pydantic
-browser-use
 chromium
 langchain_community
 openai==0.28.0
