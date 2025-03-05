@@ -1,4 +1,3 @@
-# github_actions_ai.py
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, field_validator
@@ -22,12 +21,9 @@ class WorkflowSchema(BaseModel):
     @field_validator('on', mode='before')
     @classmethod
     def valid_triggers(cls, value):
-        # Convert the raw YAML structure to the expected format
         if isinstance(value, dict):
-            # Handle nested structure (e.g., {"push": {"branches": ["main"]}})
             return value
         elif isinstance(value, str):
-            # Handle simple string triggers
             return {value: {}}
         raise ValueError("Invalid trigger event")
 
@@ -54,13 +50,11 @@ def create_azure_llm():
         model_name="gpt-4o",
         openai_api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
         openai_api_key=os.getenv("AZURE_OPENAI_KEY"),
-        #AZURE_OPENAI_ENDPOINT="https://models.inference.ai.azure.com"
     )
 
 def generate_workflow_filename(query):
-    # Convert query to a filename-friendly format
-    base_name = query.lower().replace(" ", "-")[:30]  # Take first 30 chars
-    unique_id = uuid.uuid4().hex[:8]  # Add 8 char unique identifier
+    base_name = query.lower().replace(" ", "-")[:30]
+    unique_id = uuid.uuid4().hex[:8]
     return f"{base_name}-{unique_id}.yml"
 
 def create_local_workflow_file(yaml_content, query):
@@ -78,7 +72,6 @@ def create_local_workflow_file(yaml_content, query):
 def extract_yaml_content(response):
     if isinstance(response, AIMessage):
         content = response.content
-        # Remove markdown code block indicators if present
         if content.startswith("```"):
             content = content.split("```")[1]
             if content.startswith("yaml"):
@@ -87,7 +80,6 @@ def extract_yaml_content(response):
     return response
 
 def fix_yaml_structure(yaml_dict):
-    # Fix the 'on' field if it's parsed incorrectly
     if True in yaml_dict:
         yaml_dict['on'] = yaml_dict[True]
         del yaml_dict[True]
@@ -104,7 +96,6 @@ def check_security_compliance(yaml_dict):
         for job_id, job in yaml_dict['jobs'].items():
             if 'steps' in job:
                 for step in job['steps']:
-                    # Check action versions
                     if 'uses' in step and '@' in step['uses']:
                         action = step['uses']
                         if '@master' in action or '@main' in action:
@@ -112,7 +103,6 @@ def check_security_compliance(yaml_dict):
                         elif '@v1' in action:
                             security_issues["warning"].append(f"⚠️ Consider updating {action} to latest version")
                     
-                    # Check for unsafe patterns in commands
                     if 'run' in step:
                         cmd = step['run'].lower()
                         if 'curl' in cmd and not cmd.startswith('curl --fail'):
@@ -138,7 +128,6 @@ def analyze_pipeline_efficiency(yaml_dict):
         "best_practices": []
     }
     
-    # Check for optimization opportunities
     if analysis["metrics"]["total_steps"] > 10:
         analysis["optimization_suggestions"].append("🔄 Consider splitting into multiple jobs for better parallelization")
     
@@ -148,7 +137,6 @@ def analyze_pipeline_efficiency(yaml_dict):
     if not analysis["metrics"]["matrix_builds"] and analysis["metrics"]["parallel_jobs"] == 1:
         analysis["optimization_suggestions"].append("⚡ Consider using matrix strategy for parallel testing")
     
-    # Check for best practices
     for job_id, job in yaml_dict['jobs'].items():
         if not job.get('timeout-minutes'):
             analysis["best_practices"].append("⏱️ Add timeout-minutes to prevent hanging jobs")
@@ -173,35 +161,29 @@ def analyze_build_quality(yaml_dict):
             step_run = step.get('run', '').lower()
             step_uses = step.get('uses', '').lower()
             
-            # Check for testing frameworks
             if any(tool in f"{step_name} {step_run} {step_uses}" 
                   for tool in ['pytest', 'unittest', 'coverage']):
                 build_analysis["quality_gates"].append("Unit Testing")
                 
-            # Check for linting
             if any(linter in f"{step_name} {step_run} {step_uses}"
                   for linter in ['flake8', 'pylint', 'black', 'ruff']):
                 build_analysis["linting"] = True
                 build_analysis["quality_gates"].append("Code Style")
                 
-            # Check for type checking
             if any(checker in f"{step_name} {step_run} {step_uses}"
                   for checker in ['mypy', 'pytype', 'pyre']):
                 build_analysis["type_checking"] = True
                 build_analysis["quality_gates"].append("Type Safety")
                 
-            # Check for dependency scanning
             if any(scanner in f"{step_name} {step_run} {step_uses}"
                   for scanner in ['dependabot', 'snyk', 'safety']):
                 build_analysis["dependency_audit"] = True
                 build_analysis["quality_gates"].append("Dependency Check")
                 
-            # Check for coverage
             if 'coverage' in f"{step_name} {step_run} {step_uses}":
                 build_analysis["test_coverage"] = True
     
-    # Calculate estimated success rate
-    base_rate = 70  # Base success rate
+    base_rate = 70
     if build_analysis["linting"]: base_rate += 10
     if build_analysis["type_checking"]: base_rate += 10
     if build_analysis["test_coverage"]: base_rate += 5
@@ -290,7 +272,7 @@ def generate_efficiency_section(efficiency_analysis):
 {chr(10).join(f"- {sugg}" for sugg in efficiency_analysis["optimization_suggestions"]) or "✅ No optimization needed"}"""
 
 def calculate_runtime(efficiency_analysis, build_analysis):
-    base_time = efficiency_analysis["metrics"]["total_steps"] * 0.5  # 30 seconds per step
+    base_time = efficiency_analysis["metrics"]["total_steps"] * 0.5
     if build_analysis["test_coverage"]: base_time += 2
     if build_analysis["linting"]: base_time += 1
     if build_analysis["type_checking"]: base_time += 1
@@ -304,7 +286,7 @@ def calculate_resource_usage(efficiency_analysis):
     return "🟢 Low"
 
 def calculate_efficiency_score(efficiency_analysis, build_analysis):
-    score = 60  # Base score
+    score = 60
     if efficiency_analysis["metrics"]["matrix_builds"]: score += 10
     if efficiency_analysis["metrics"]["caching_used"]: score += 10
     if build_analysis["linting"]: score += 10
@@ -340,19 +322,15 @@ def main():
     parser.add_argument("--query", required=True, help="Workflow requirements description")
     args = parser.parse_args()
 
-    # Generate YAML
-    print("Generating GitHub Actions YAML...")
     llm = create_azure_llm()
     prompt = generate_yaml_prompt(args.query)
     
-    # Create chain using pipe operator
     chain = prompt | llm
     response = chain.invoke({"query": args.query})
     yaml_content = extract_yaml_content(response)
     print("Generated YAML content:")
     print(yaml_content)
 
-    # Validate YAML
     print("\nValidating YAML content...")
     try:
         yaml_dict = yaml.safe_load(yaml_content)
@@ -375,12 +353,10 @@ def main():
         print(f"YAML content structure: {yaml_dict}")
         return
 
-    # Security and efficiency analysis
     print("\nPerforming security checks...")
     security_issues = check_security_compliance(yaml_dict)
     efficiency_analysis = analyze_pipeline_efficiency(yaml_dict)
     
-    # Generate report
     report_name = f"workflow-analysis-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md"
     report_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
     os.makedirs(report_dir, exist_ok=True)
@@ -389,7 +365,6 @@ def main():
     report_file = generate_report(yaml_dict, security_issues, efficiency_analysis, report_path, args.query)
     print(f"\nAnalysis report generated at: {report_file}")
 
-    # Create local workflow file with query-based filename
     local_file_path = create_local_workflow_file(yaml_content, args.query)
     print(f"\nWorkflow created successfully at {local_file_path}")
 
