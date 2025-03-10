@@ -14,7 +14,7 @@ An intelligent system that generates, analyzes, and optimizes GitHub Actions wor
 ## Prerequisites
 
 - Python 3.7+
-- Azure OpenAI API access
+- Azure OpenAI API access or claude
 - Environment variables configured
 
 ## Installation
