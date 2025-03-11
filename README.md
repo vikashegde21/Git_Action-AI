@@ -1,4 +1,4 @@
-# GitHub Actions AI Generator
+# GitHub Actions AI Pipeline Generator
 
 An intelligent system that generates, analyzes, and optimizes GitHub Actions workflows using AI. The tool provides comprehensive analysis reports and security recommendations for your CI/CD pipelines.
 
